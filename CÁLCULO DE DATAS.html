@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Datas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .result-container {
+            margin-top: 20px;
+        }
+        .result {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .result input, .result label, .result button {
+            margin-left: 10px;
+        }
+        .input-field {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .input-field input {
+            margin-left: 10px;
+        }
+        .copy-alert {
+            display: none;
+            color: green;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cálculo de Datas</h1>
+        <div class="input-field">
+            <label for="inputDate">Digite uma data (DD/MM/AAAA ou DDMMAAAA): </label>
+            <input type="text" id="inputDate" placeholder="DD/MM/AAAA ou DDMMAAAA">
+        </div>
+        <div class="input-field">
+            <label for="inputDays">Digite um número de dias corridos (NNNNN): </label>
+            <input type="number" id="inputDays" placeholder="00000" min="0" value="0">
+        </div>
+        <div class="input-field">
+            <label for="inputMonths">Digite um número de meses (NNNN): </label>
+            <input type="number" id="inputMonths" placeholder="0000" min="0" value="0">
+        </div>
+        <button onclick="calculateDates()">Calcular</button>
+
+        <div class="result-container">
+            <div class="result">
+                <label>Data após 2,5 anos:</label>
+                <input type="text" id="dateAfter2_5Years" readonly>
+                <button onclick="copyToClipboard('dateAfter2_5Years')">Copiar</button>
+            </div>
+            <div class="result">
+                <label>Data após 3 anos:</label>
+                <input type="text" id="dateAfter3Years" readonly>
+                <button onclick="copyToClipboard('dateAfter3Years')">Copiar</button>            </div>
+            <div class="result">
+                <label>Data após 4,5 anos:</label>
+                <input type="text" id="dateAfter4_5Years" readonly>
+                <button onclick="copyToClipboard('dateAfter4_5Years')">Copiar</button>
+            </div>
+            <div class="result">
+                <label>Data após 5,5 anos:</label>
+                <input type="text" id="dateAfter5_5Years" readonly>
+                <button onclick="copyToClipboard('dateAfter5_5Years')">Copiar</button>
+            </div>
+            <div class="result">
+                <label>Data após dias corridos:</label>
+                <input type="text" id="dateAfterDays" readonly>
+                <button onclick="copyToClipboard('dateAfterDays')">Copiar</button>
+            </div>
+            <div class="result">
+                <label>Data após meses:</label>
+                <input type="text" id="dateAfterMonths" readonly>
+                <button onclick="copyToClipboard('dateAfterMonths')">Copiar</button>
+            </div>
+        </div>
+        <div class="copy-alert" id="copyAlert">Data copiada com sucesso!</div>
+    </div>
+
+    <script>
+        function calculateDates() {
+            const input = document.getElementById('inputDate').value.replace(/\D/g, '');
+            let day, month, year;
+
+            if (input.length === 8) {
+                day = parseInt(input.substring(0, 2));
+                month = parseInt(input.substring(2, 4));
+                year = parseInt(input.substring(4, 8));
+            } else {
+                alert('Data inválida. Por favor, insira uma data válida no formato DD/MM/AAAA ou DDMMAAAA.');
+                return;
+            }
+
+            const inputDate = new Date(year, month - 1, day);
+
+            if (isNaN(inputDate) || day > 31 || month > 12 || year < 1000) {
+                alert('Data inválida. Por favor, insira uma data válida no formato DD/MM/AAAA ou DDMMAAAA.');
+                return;
+            }
+
+            const daysToAdd = parseInt(document.getElementById('inputDays').value) || 0;
+            const monthsToAdd = parseInt(document.getElementById('inputMonths').value) || 0;
+
+            const dateAfter30Months = addMonths(new Date(inputDate), 30);
+            const dateAfter36Months = addMonths(new Date(inputDate), 36);
+            const dateAfter54Months = addMonths(new Date(inputDate), 54);
+            const dateAfter66Months = addMonths(new Date(inputDate), 66);
+            const dateAfterDays = addDays(new Date(inputDate), daysToAdd);
+            const dateAfterModulesMonths = addMonths(new Date(inputDate), monthsToAdd);
+
+            document.getElementById('dateAfter2_5Years').value = formatDateString(dateAfter30Months);
+            document.getElementById('dateAfter3Years').value = formatDateString(dateAfter36Months);
+            document.getElementById('dateAfter4_5Years').value = formatDateString(dateAfter54Months);
+            document.getElementById('dateAfter5_5Years').value = formatDateString(dateAfter66Months);
+            document.getElementById('dateAfterDays').value = formatDateString(dateAfterDays);
+            document.getElementById('dateAfterMonths').value = formatDateString(dateAfterModulesMonths);
+        }
+
+        function addDays(date, days) {
+            date.setDate(date.getDate() + days);
+            return date;
+        }
+
+        function addMonths(date, months) {
+            const day = date.getDate();
+            date.setMonth(date.getMonth() + months);
+
+            // Ajuste para o final do mês, se necessário
+            if (date.getDate() < day) {
+                date.setDate(0);
+            }
+
+            return date;
+        }
+
+        function formatDateString(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function copyToClipboard(id) {
+            const input = document.getElementById(id);
+            input.select();
+            input.setSelectionRange(0, 99999); // Para dispositivos móveis
+            document.execCommand('copy');
+
+            const alertBox = document.getElementById('copyAlert');
+            alertBox.style.display = 'block';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 2000);
+        }
+    </script>
+</body>
+</html>
